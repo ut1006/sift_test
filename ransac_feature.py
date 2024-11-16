@@ -76,13 +76,12 @@ def calculate_3d_points(keypoints1, keypoints2, matches, disp1, disp2):
             p2 = depth_to_3d(x2, y2, disp2)
             points1.append(p1)
             points2.append(p2)
-        except IndexError:
+        except IndexError: 
             # 視差画像の境界を超える特徴点をスキップ
             continue
 
     print(f"有効な3次元対応点数: {len(points1)}")
     return np.array(points1), np.array(points2)
-
 def estimate_transformation_ransac(points1, points2):
     # Create Open3D point clouds
     pcd1 = o3d.geometry.PointCloud()
@@ -103,7 +102,17 @@ def estimate_transformation_ransac(points1, points2):
         [o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(distance_threshold)],
         o3d.pipelines.registration.RANSACConvergenceCriteria(4000000, 500)
     )
-    return result.transformation
+
+    # 推定された変換行列を取得
+    transformation = result.transformation
+
+    # インライアの数を取得
+    inlier_count = len(result.correspondence_set)
+
+    print("推定された変換行列:")
+    print(transformation)
+    print(f"インライア数: {inlier_count}")
+    return transformation, inlier_count
 
 def main():
     # 画像ファイルと視差ファイル（深度情報が格納された.npy）
